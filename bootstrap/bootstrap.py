@@ -34,14 +34,14 @@ def get_os_release_variable(key):
 def main():
 
     # Support only Ubuntu 18.04+
-    distro = get_os_release_variable('ID')
-    version = float(get_os_release_variable('VERSION_ID'))
-    if distro != 'ubuntu':
-        print('The Littlest JupyterHub currently supports Ubuntu Linux only')
-        sys.exit(1)
-    elif float(version) < 18.04:
-        print('The Littlest JupyterHub requires Ubuntu 18.04 or higher')
-        sys.exit(1)
+    #distro = get_os_release_variable('ID')
+    #version = float(get_os_release_variable('VERSION_ID'))
+    # if distro != 'ubuntu':
+    #     print('The Littlest JupyterHub currently supports Ubuntu Linux only')
+    #     sys.exit(1)
+    # elif float(version) < 18.04:
+    #     print('The Littlest JupyterHub requires Ubuntu 18.04 or higher')
+    #     sys.exit(1)
 
     install_prefix = os.environ.get('TLJH_INSTALL_PREFIX', '/opt/tljh')
     hub_prefix = os.path.join(install_prefix, 'hub')
@@ -66,11 +66,11 @@ def main():
     else:
         logger.info('Setting up hub environment')
         initial_setup = True
-        subprocess.check_output(['apt-get', 'update', '--yes'], stderr=subprocess.STDOUT)
-        subprocess.check_output(['apt-get', 'install', '--yes', 'python3', 'python3-venv'], stderr=subprocess.STDOUT)
+        # subprocess.check_output(['apt-get', 'update', '--yes'], stderr=subprocess.STDOUT)
+        # subprocess.check_output(['apt-get', 'install', '--yes', 'python3', 'python3-venv'], stderr=subprocess.STDOUT)
         logger.info('Installed python & virtual environment')
         os.makedirs(hub_prefix, exist_ok=True)
-        subprocess.check_output(['python3', '-m', 'venv', hub_prefix], stderr=subprocess.STDOUT)
+        # subprocess.check_output(['python3', '-m', 'venv', hub_prefix], stderr=subprocess.STDOUT)
         logger.info('Set up hub virtual environment')
 
     if initial_setup:
@@ -86,13 +86,14 @@ def main():
         'git+https://github.com/jupyterhub/the-littlest-jupyterhub.git'
     )
 
-    subprocess.check_output([
-        os.path.join(hub_prefix, 'bin', 'pip'),
-        'install'
-    ] + pip_flags + [tljh_repo_path], stderr=subprocess.STDOUT)
+    # subprocess.check_output([
+    #     os.path.join(hub_prefix, 'bin', 'pip'),
+    #     'install'
+    # ] + pip_flags + [tljh_repo_path], stderr=subprocess.STDOUT)
     logger.info('Setup tljh package')
 
     logger.info('Starting TLJH installer...')
+    hub_prefix = '/usr/local/'
     os.execv(
         os.path.join(hub_prefix, 'bin', 'python3'),
         [

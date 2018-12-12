@@ -56,11 +56,11 @@ def ensure_group(groupname):
     """
     Ensure given group exists
     """
-    subprocess.check_call([
-        'groupadd',
-        '--force',
-        groupname
-    ])
+    # subprocess.check_call([
+    #     'groupadd',
+    #     '--force',
+    #     groupname
+    # ])
 
 
 def remove_group(groupname):

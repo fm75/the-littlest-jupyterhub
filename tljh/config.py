@@ -19,7 +19,7 @@ import os
 import re
 import sys
 
-from .yaml import yaml
+# from .yaml import yaml
 
 
 INSTALL_PREFIX = os.environ.get('TLJH_INSTALL_PREFIX', '/opt/tljh')

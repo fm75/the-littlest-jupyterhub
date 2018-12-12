@@ -11,15 +11,15 @@ import time
 from urllib.error import HTTPError
 from urllib.request import urlopen, URLError
 
-import pluggy
+# import pluggy
 
 from tljh import (
     apt,
     conda,
-    hooks,
-    migrator,
+    # hooks,
+    # migrator,
     systemd,
-    traefik,
+    # traefik,
     user,
 )
 from .config import (
@@ -30,12 +30,12 @@ from .config import (
     STATE_DIR,
     USER_ENV_PREFIX,
 )
-from .yaml import yaml
+# from .yaml import yaml
 
 HERE = os.path.abspath(os.path.dirname(__file__))
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("__name__")
 
 def ensure_node():
     """
@@ -201,13 +201,13 @@ def ensure_usergroups():
     user.ensure_group('jupyterhub-users')
 
     logger.info("Granting passwordless sudo to JupyterHub admins...")
-    with open('/etc/sudoers.d/jupyterhub-admins', 'w') as f:
-        # JupyterHub admins should have full passwordless sudo access
-        f.write('%jupyterhub-admins ALL = (ALL) NOPASSWD: ALL\n')
-        # `sudo -E` should preserve the $PATH we set. This allows
-        # admins in jupyter terminals to do `sudo -E pip install <package>`,
-        # `pip` is in the $PATH we set in jupyterhub_config.py to include the user conda env.
-        f.write('Defaults exempt_group = jupyterhub-admins\n')
+    # with open('/etc/sudoers.d/jupyterhub-admins', 'w') as f:
+    #     # JupyterHub admins should have full passwordless sudo access
+    #     f.write('%jupyterhub-admins ALL = (ALL) NOPASSWD: ALL\n')
+    #     # `sudo -E` should preserve the $PATH we set. This allows
+    #     # admins in jupyter terminals to do `sudo -E pip install <package>`,
+    #     # `pip` is in the $PATH we set in jupyterhub_config.py to include the user conda env.
+    #     f.write('Defaults exempt_group = jupyterhub-admins\n')
 
 
 def ensure_user_environment(user_requirements_txt_file):
@@ -220,35 +220,35 @@ def ensure_user_environment(user_requirements_txt_file):
 
     if not conda.check_miniconda_version(USER_ENV_PREFIX, miniconda_version):
         logger.info('Downloading & setting up user environment...')
-        with conda.download_miniconda_installer(miniconda_version, miniconda_installer_md5) as installer_path:
-            conda.install_miniconda(installer_path, USER_ENV_PREFIX)
+        # with conda.download_miniconda_installer(miniconda_version, miniconda_installer_md5) as installer_path:
+        #     conda.install_miniconda(installer_path, USER_ENV_PREFIX)
 
     # nbresuse needs psutil, which requires gcc
-    apt.install_packages([
-        'gcc'
-    ])
+    # apt.install_packages([
+    #     'gcc'
+    # ])
 
-    conda.ensure_conda_packages(USER_ENV_PREFIX, [
-        # Conda's latest version is on conda much more so than on PyPI.
-        'conda==4.5.8'
-    ])
+    # conda.ensure_conda_packages(USER_ENV_PREFIX, [
+    #     # Conda's latest version is on conda much more so than on PyPI.
+    #     'conda==4.5.8'
+    # ])
 
-    conda.ensure_pip_packages(USER_ENV_PREFIX, [
-        # JupyterHub + notebook package are base requirements for user environment
-        'jupyterhub==0.9.4',
-        'notebook==5.7.0',
-        # Install additional notebook frontends!
-        'jupyterlab==0.35.3',
-        'nteract-on-jupyter==1.9.12',
-        # nbgitpuller for easily pulling in Git repositories
-        'nbgitpuller==0.6.1',
-        # nbresuse to show people how much RAM they are using
-        'nbresuse==0.3.0'
-    ])
+    # conda.ensure_pip_packages(USER_ENV_PREFIX, [
+    #     # JupyterHub + notebook package are base requirements for user environment
+    #     'jupyterhub==0.9.4',
+    #     'notebook==5.7.0',
+    #     # Install additional notebook frontends!
+    #     'jupyterlab==0.35.3',
+    #     'nteract-on-jupyter==1.9.12',
+    #     # nbgitpuller for easily pulling in Git repositories
+    #     'nbgitpuller==0.6.1',
+    #     # nbresuse to show people how much RAM they are using
+    #     'nbresuse==0.3.0'
+    # ])
 
-    if user_requirements_txt_file:
-        # FIXME: This currently fails hard, should fail soft and not abort installer
-        conda.ensure_pip_requirements(USER_ENV_PREFIX, user_requirements_txt_file)
+    # if user_requirements_txt_file:
+    #     # FIXME: This currently fails hard, should fail soft and not abort installer
+    #     conda.ensure_pip_requirements(USER_ENV_PREFIX, user_requirements_txt_file)
 
 
 def ensure_admins(admins):
@@ -268,8 +268,8 @@ def ensure_admins(admins):
     config['users'] = config.get('users', {})
     config['users']['admin'] = list(admins)
 
-    with open(config_path, 'w+') as f:
-        yaml.dump(config, f)
+    # with open(config_path, 'w+') as f:
+    #     yaml.dump(config, f)
 
 
 def ensure_jupyterhub_running(times=4):
@@ -299,7 +299,7 @@ def ensure_jupyterhub_running(times=4):
             # Everything else should immediately abort
             raise
 
-    raise Exception("Installation failed: JupyterHub did not start in {}s".format(times))
+    # raise Exception("Installation failed: JupyterHub did not start in {}s".format(times))
 
 
 def ensure_symlinks(prefix):
@@ -333,14 +333,14 @@ def setup_plugins(plugins=None):
     Install plugins & setup a pluginmanager
     """
     # Install plugins
-    if plugins:
-        conda.ensure_pip_packages(HUB_ENV_PREFIX, plugins)
+    # if plugins:
+    #     conda.ensure_pip_packages(HUB_ENV_PREFIX, plugins)
 
     # Set up plugin infrastructure
-    pm = pluggy.PluginManager('tljh')
-    pm.add_hookspecs(hooks)
-    pm.load_setuptools_entrypoints('tljh')
-
+    # pm = pluggy.PluginManager('tljh')
+    # pm.add_hookspecs(hooks)
+    # pm.load_setuptools_entrypoints('tljh')
+    pm = None
     return pm
 
 
@@ -348,30 +348,32 @@ def run_plugin_actions(plugin_manager, plugins):
     """
     Run installer hooks defined in plugins
     """
-    hook = plugin_manager.hook
+    logger.info('Installing {} '.format('stuff'))
+
+    # hook = plugin_manager.hook
     # Install apt packages
-    apt_packages = list(set(itertools.chain(*hook.tljh_extra_apt_packages())))
-    if apt_packages:
-        logger.info('Installing {} apt packages collected from plugins: {}'.format(
-            len(apt_packages), ' '.join(apt_packages)
-        ))
-        apt.install_packages(apt_packages)
+    # apt_packages = list(set(itertools.chain(*hook.tljh_extra_apt_packages())))
+    # if apt_packages:
+        # logger.info('Installing {} apt packages collected from plugins: {}'.format(
+        #     len(apt_packages), ' '.join(apt_packages)
+        # ))
+        # apt.install_packages(apt_packages)
 
     # Install conda packages
-    conda_packages = list(set(itertools.chain(*hook.tljh_extra_user_conda_packages())))
-    if conda_packages:
-        logger.info('Installing {} conda packages collected from plugins: {}'.format(
-            len(conda_packages), ' '.join(conda_packages)
-        ))
-        conda.ensure_conda_packages(USER_ENV_PREFIX, conda_packages)
+    # conda_packages = list(set(itertools.chain(*hook.tljh_extra_user_conda_packages())))
+    # if conda_packages:
+    #     logger.info('Installing {} conda packages collected from plugins: {}'.format(
+    #         len(conda_packages), ' '.join(conda_packages)
+    #     ))
+    #     conda.ensure_conda_packages(USER_ENV_PREFIX, conda_packages)
 
     # Install pip packages
-    pip_packages = list(set(itertools.chain(*hook.tljh_extra_user_pip_packages())))
-    if pip_packages:
-        logger.info('Installing {} pip packages collected from plugins: {}'.format(
-            len(pip_packages), ' '.join(pip_packages)
-        ))
-        conda.ensure_pip_packages(USER_ENV_PREFIX, pip_packages)
+    # pip_packages = list(set(itertools.chain(*hook.tljh_extra_user_pip_packages())))
+    # if pip_packages:
+    #     logger.info('Installing {} pip packages collected from plugins: {}'.format(
+    #         len(pip_packages), ' '.join(pip_packages)
+    #     ))
+    #     conda.ensure_pip_packages(USER_ENV_PREFIX, pip_packages)
 
 
 def ensure_config_yaml(plugin_manager):
@@ -390,8 +392,8 @@ def ensure_config_yaml(plugin_manager):
     else:
         config = {}
 
-    hook = plugin_manager.hook
-    hook.tljh_config_post_install(config=config)
+    # hook = plugin_manager.hook
+    # hook.tljh_config_post_install(config=config)
 
     with open(CONFIG_FILE, 'w+') as f:
         yaml.dump(config, f)
@@ -421,19 +423,19 @@ def main():
 
     pm = setup_plugins(args.plugin)
 
-    ensure_config_yaml(pm)
+    # ensure_config_yaml(pm)
     ensure_admins(args.admin)
     ensure_usergroups()
     ensure_user_environment(args.user_requirements_txt_url)
 
     logger.info("Setting up JupyterHub...")
-    ensure_node()
-    ensure_jupyterhub_package(HUB_ENV_PREFIX)
-    ensure_chp_package(HUB_ENV_PREFIX)
-    ensure_jupyterlab_extensions()
-    ensure_jupyterhub_service(HUB_ENV_PREFIX)
+    # ensure_node()
+    # ensure_jupyterhub_package(HUB_ENV_PREFIX)
+    # ensure_chp_package(HUB_ENV_PREFIX)
+    # ensure_jupyterlab_extensions()
+    # ensure_jupyterhub_service(HUB_ENV_PREFIX)
     ensure_jupyterhub_running()
-    ensure_symlinks(HUB_ENV_PREFIX)
+    # ensure_symlinks(HUB_ENV_PREFIX)
 
     # Run installer plugins last
     run_plugin_actions(pm, args.plugin)
